@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campusconnect-deployment
+  labels:
+    app: campusconnect
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: campusconnect
+  template:
+    metadata:
+      labels:
+        app: campusconnect
+    spec:
+      containers:
+      - name: campusconnect
+        image: us-central1-docker.pkg.dev/campusconnect-project-12345/campusconnect-repo/campusconnect:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: campusconnect-service
+spec:
+  selector:
+    app: campusconnect
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
