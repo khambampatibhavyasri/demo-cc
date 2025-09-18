@@ -3,43 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusConnect</title>
+    <title>CampusConnect - Campus Management System</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 50px;
-            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
         }
-        .container {
-            max-width: 800px;
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .status {
-            color: #28a745;
+
+        .logo {
+            font-size: 1.8rem;
             font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .features {
+            background: white;
+            padding: 4rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: #f8f9ff;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #e0e6ff;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .api-section {
+            background: #f8f9fa;
+            padding: 4rem 2rem;
+        }
+
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .api-endpoint {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .api-endpoint h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .api-endpoint a {
+            color: #28a745;
+            text-decoration: none;
+            font-family: monospace;
+        }
+
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎓 CampusConnect</h1>
-        <p class="status">✅ Application is running successfully!</p>
-        <p>Backend API is ready and serving requests.</p>
-        <p>Frontend will be integrated in future deployments.</p>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">🎓 CampusConnect</div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#features">Features</a>
+                <a href="#api">API</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
 
-        <h3>Available Endpoints:</h3>
-        <ul>
-            <li><a href="/health">/health</a> - Health check</li>
-            <li><a href="/healthz">/healthz</a> - Simple health status</li>
-            <li>/api/students - Student API</li>
-            <li>/api/clubs - Club API</li>
-            <li>/api/admin - Admin API</li>
-            <li>/api/events - Events API</li>
-        </ul>
-    </div>
+    <section class="hero" id="home">
+        <h1>Welcome to CampusConnect</h1>
+        <p>Your Complete Campus Management Solution</p>
+        <div class="status">
+            ✅ System Online & Running Smoothly
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Platform Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Student Management</h3>
+                    <p>Complete student profiles, enrollment tracking, and academic records management</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏛️</div>
+                    <h3>Club Management</h3>
+                    <p>Organize campus clubs, manage memberships, and track activities</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>Admin Dashboard</h3>
+                    <p>Comprehensive administrative tools for campus-wide management</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3>Event Management</h3>
+                    <p>Plan, organize, and track campus events and activities</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="api-section" id="api">
+        <div class="container">
+            <h2>Available API Services</h2>
+            <p style="text-align: center; margin-bottom: 2rem;">RESTful API endpoints ready for integration</p>
+            <div class="api-grid">
+                <div class="api-endpoint">
+                    <h4>System Health</h4>
+                    <a href="/health" target="_blank">/health</a>
+                    <p>System status and diagnostics</p>
+                </div>
+                <div class="api-endpoint">
+                    <h4>Quick Health Check</h4>
+                    <a href="/healthz" target="_blank">/healthz</a>
+                    <p>Simple health verification</p>
+                </div>
+                <div class="api-endpoint">
+                    <h4>Student API</h4>
+                    <a href="/api/students" target="_blank">/api/students</a>
+                    <p>Student data management</p>
+                </div>
+                <div class="api-endpoint">
+                    <h4>Club API</h4>
+                    <a href="/api/clubs" target="_blank">/api/clubs</a>
+                    <p>Campus club operations</p>
+                </div>
+                <div class="api-endpoint">
+                    <h4>Admin API</h4>
+                    <a href="/api/admin" target="_blank">/api/admin</a>
+                    <p>Administrative functions</p>
+                </div>
+                <div class="api-endpoint">
+                    <h4>Events API</h4>
+                    <a href="/api/events" target="_blank">/api/events</a>
+                    <p>Event management system</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 CampusConnect. Deployed with modern DevOps pipeline.</p>
+            <p>Backend: Node.js + Express | Database: MongoDB Atlas | Container: Docker | Orchestration: Kubernetes</p>
+        </div>
+    </footer>
 </body>
 </html>
