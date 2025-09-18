@@ -16,10 +16,89 @@ env:
   LOCATION: us-central1
 
 jobs:
-  setup-build-publish-deploy:
-    name: Setup, Build, Publish, and Deploy
+  trigger-jenkins-tests:
+    name: Trigger Jenkins Tests
     runs-on: ubuntu-latest
-    environment: production
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Trigger Jenkins Job
+      run: |
+        echo "Triggering Jenkins job at ${{ secrets.JENKINS_URL }}"
+
+        # Get CSRF crumb first
+        CRUMB=$(curl -s -u "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}" \
+          "${{ secrets.JENKINS_URL }}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,%22:%22,//crumb)")
+        echo "CSRF Crumb: $CRUMB"
+
+        # Extract crumb header and value
+        CRUMB_HEADER=$(echo $CRUMB | cut -d: -f1)
+        CRUMB_VALUE=$(echo $CRUMB | cut -d: -f2)
+
+        # Trigger Jenkins job with CSRF token
+        BUILD_RESPONSE=$(curl -w "HTTPSTATUS:%{http_code}" -s -X POST \
+          -u "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}" \
+          -H "$CRUMB_HEADER: $CRUMB_VALUE" \
+          "${{ secrets.JENKINS_URL }}/job/campusconnect-tests/buildWithParameters" \
+          -d "token=campusconnect-test-token" \
+          -d "cause=GitHub+Actions+Trigger")
+
+        HTTP_STATUS=$(echo $BUILD_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+        RESPONSE_BODY=$(echo $BUILD_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+
+        echo "HTTP Status: $HTTP_STATUS"
+        echo "Response: $RESPONSE_BODY"
+
+        if [ $HTTP_STATUS -ne 201 ] && [ $HTTP_STATUS -ne 200 ]; then
+          echo "❌ Failed to trigger Jenkins job (Status: $HTTP_STATUS)"
+          echo "Response: $RESPONSE_BODY"
+          exit 1
+        fi
+
+        echo "✅ Jenkins job triggered successfully"
+
+    - name: Wait for Jenkins Job
+      run: |
+        echo "Waiting for Jenkins tests to complete..."
+        sleep 45
+
+        # Get the latest build status
+        RESPONSE=$(curl -s -u "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}" \
+          "${{ secrets.JENKINS_URL }}/job/campusconnect-tests/lastBuild/api/json")
+
+        echo "Jenkins job response: $RESPONSE"
+
+        # Extract build result
+        RESULT=$(echo "$RESPONSE" | grep -o '"result":"[^"]*"' | cut -d'"' -f4)
+        echo "Build result: $RESULT"
+
+        # Check if build was successful
+        if [ "$RESULT" = "SUCCESS" ]; then
+          echo "✅ Jenkins tests passed!"
+        elif [ "$RESULT" = "null" ] || [ "$RESULT" = "" ]; then
+          echo "⏳ Build still running, waiting more..."
+          sleep 30
+          # Check again
+          RESPONSE=$(curl -s -u "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}" \
+            "${{ secrets.JENKINS_URL }}/job/campusconnect-tests/lastBuild/api/json")
+          RESULT=$(echo "$RESPONSE" | grep -o '"result":"[^"]*"' | cut -d'"' -f4)
+          if [ "$RESULT" = "SUCCESS" ]; then
+            echo "✅ Jenkins tests passed!"
+          else
+            echo "❌ Jenkins tests failed with result: $RESULT"
+            exit 1
+          fi
+        else
+          echo "❌ Jenkins tests failed with result: $RESULT"
+          exit 1
+        fi
+
+  build-and-deploy:
+    name: Build and Deploy to GKE
+    runs-on: ubuntu-latest
+    needs: trigger-jenkins-tests
+    if: github.ref == 'refs/heads/main'
 
     steps:
     - name: Checkout
