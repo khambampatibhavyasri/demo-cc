@@ -11,6 +11,34 @@ router.use((req, res, next) => {
   }
   next();
 });
+
+// GET admin info (for testing)
+router.get('/', async (req, res) => {
+  try {
+    console.log('[ADMIN] GET / - Admin API accessed');
+    res.json({
+      success: true,
+      message: 'Admin API is working',
+      data: {
+        adminCount: 1,
+        databaseStatus: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+      },
+      endpoints: {
+        login: 'POST /api/admin/login',
+        dashboard: 'GET /api/admin/dashboard (requires auth)',
+        stats: 'GET /api/admin/stats (requires auth)'
+      }
+    });
+  } catch (error) {
+    console.error('[ADMIN] GET / error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error accessing admin API',
+      error: error.message
+    });
+  }
+});
+
 // Verified admin account with working password hash
 const admins = [
   {

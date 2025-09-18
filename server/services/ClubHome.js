@@ -20,6 +20,32 @@ const EventSchema = new mongoose.Schema({
 
 const Event = mongoose.model('Event', EventSchema);
 
+// GET all events (for testing)
+router.get('/', async (req, res) => {
+  try {
+    console.log('[EVENTS] GET / - Fetching all events');
+    const events = await Event.find().populate('club', 'name').limit(10);
+
+    res.json({
+      success: true,
+      message: `Found ${events.length} events`,
+      data: events,
+      endpoints: {
+        createEvent: 'POST /api/events (requires club auth)',
+        purchaseTicket: 'POST /api/events/:id/purchase (requires student auth)',
+        myTickets: 'GET /api/events/my-tickets (requires student auth)'
+      }
+    });
+  } catch (error) {
+    console.error('[EVENTS] GET / error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching events',
+      error: error.message
+    });
+  }
+});
+
 // Middleware to verify JWT
 const auth = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];

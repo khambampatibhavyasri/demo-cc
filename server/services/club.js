@@ -26,6 +26,33 @@ clubSchema.methods.comparePassword = async function(candidatePassword) {
 
 const Club = mongoose.model('Club', clubSchema);
 
+// GET all clubs (for testing)
+router.get('/', async (req, res) => {
+  try {
+    console.log('[CLUB] GET / - Fetching all clubs');
+    const clubs = await Club.find().select('-password -__v').limit(10);
+
+    res.json({
+      success: true,
+      message: `Found ${clubs.length} clubs`,
+      data: clubs,
+      endpoints: {
+        signup: 'POST /api/clubs/signup',
+        login: 'POST /api/clubs/login',
+        profile: 'GET /api/clubs/profile (requires auth)',
+        updateProfile: 'PUT /api/clubs/profile (requires auth)'
+      }
+    });
+  } catch (error) {
+    console.error('[CLUB] GET / error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching clubs',
+      error: error.message
+    });
+  }
+});
+
 // Club Signup
 router.post('/signup', async (req, res) => {
   try {

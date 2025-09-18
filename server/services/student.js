@@ -26,6 +26,33 @@ studentSchema.methods.comparePassword = async function(candidatePassword) {
 
 const Student = mongoose.model('Student', studentSchema);
 
+// GET all students (for testing)
+router.get('/', async (req, res) => {
+  try {
+    console.log('[STUDENT] GET / - Fetching all students');
+    const students = await Student.find().select('-password -__v').limit(10);
+
+    res.json({
+      success: true,
+      message: `Found ${students.length} students`,
+      data: students,
+      endpoints: {
+        signup: 'POST /api/students/signup',
+        login: 'POST /api/students/login',
+        profile: 'GET /api/students/profile (requires auth)',
+        updateProfile: 'PUT /api/students/profile (requires auth)'
+      }
+    });
+  } catch (error) {
+    console.error('[STUDENT] GET / error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching students',
+      error: error.message
+    });
+  }
+});
+
 // Student Signup
 router.post('/signup', async (req, res) => {
   try {
