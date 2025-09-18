@@ -5,7 +5,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci 
 
-
 COPY . .
 
 ARG REACT_APP_API_BASE_URL=http://localhost:5000
