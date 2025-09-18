@@ -1,4 +1,18 @@
-# Simplified single-stage build for CampusConnect application
+# Multi-stage build for CampusConnect application
+
+# Stage 1: Build React frontend
+FROM node:18-alpine AS frontend-build
+WORKDIR /app/frontend
+
+# Copy frontend package files
+COPY cc/package*.json ./
+RUN npm install
+
+# Copy frontend source and build
+COPY cc/ ./
+RUN npm run build
+
+# Stage 2: Setup Node.js backend
 FROM node:18-alpine
 
 # Install wget for health checks
@@ -6,15 +20,15 @@ RUN apk add --no-cache wget
 
 WORKDIR /app
 
-# Install backend dependencies first
+# Install backend dependencies
 COPY server/package*.json ./
 RUN npm install
 
 # Copy backend source
 COPY server/ ./
 
-# Copy the simple HTML file for frontend
-COPY public/index.html ./public/
+# Copy built React app from stage 1
+COPY --from=frontend-build /app/frontend/build ./public/
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \

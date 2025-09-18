@@ -103,15 +103,14 @@ app.use((err, req, res, next) => {
   });
 });
 
+// 404 handler for API routes only
+app.use('/api/*', (req, res) => {
+  console.log(`[404] API route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ error: 'API route not found' });
+});
+
 // Serve React app for all non-API routes
 app.get('*', (req, res) => {
-  // Skip API routes
-  if (req.path.startsWith('/api/')) {
-    console.log(`[404] API route not found: ${req.method} ${req.originalUrl}`);
-    return res.status(404).json({ error: 'API route not found' });
-  }
-
-  // Serve React app
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
