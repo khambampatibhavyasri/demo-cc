@@ -19,7 +19,8 @@
       "Bash(powershell:*)",
       "Bash(ipconfig)",
       "Bash(findstr:*)",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []
