@@ -15,7 +15,6 @@ import { Edit, Save, Cancel } from "@mui/icons-material";
 import apiClient from "../api/client";
 import { deepPurple } from "@mui/material/colors";
 import API_BASE_URL from '../config/api';
-import { deepPurple } from "@mui/material/colors";
 
 const Profile = () => {
   const [profile, setProfile] = useState({
