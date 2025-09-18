@@ -13,7 +13,7 @@ import {
   Grid,
   Box
 } from '@mui/material';
-import axios from 'axios';
+import apiClient from '../../api/client';
 import { format } from 'date-fns';
 import API_BASE_URL from '../../config/api';
 import { jwtDecode } from 'jwt-decode';
@@ -51,7 +51,7 @@ const ClubHome = () => {
         setLoading(prev => ({ ...prev, fetch: true }));
         const clubId = getClubId();
         
-        const res = await axios.get(`${API_BASE_URL}/api/events/club`, {
+        const res = await apiClient.get(`/api/events/club`, {
           headers: { 
             Authorization: `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
@@ -86,7 +86,7 @@ const ClubHome = () => {
       setLoading(prev => ({ ...prev, create: true }));
       const clubId = getClubId();
       
-      const res = await axios.post(`${API_BASE_URL}/api/events`, {
+      const res = await apiClient.post('/api/events', {
         ...eventData,
         club: clubId
       }, {
@@ -117,7 +117,7 @@ const ClubHome = () => {
   const handleDelete = async (id) => {
     try {
       setLoading(prev => ({ ...prev, [id]: true }));
-      await axios.delete(`${API_BASE_URL}/api/events/${id}`, {
+      await apiClient.delete(`/api/events/${id}`, {
         headers: { 
           Authorization: `Bearer ${localStorage.getItem('token')}` 
         }

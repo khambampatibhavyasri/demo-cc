@@ -13,7 +13,7 @@ import {
   Alert
 } from '@mui/material';
 import { styled } from '@mui/system';
-import axios from 'axios';
+import apiClient from '../api/client';
 import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../config/api';
 
@@ -90,7 +90,7 @@ const Signup = () => {
     setLoading(true);
     
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/students/signup`, studentData);
+      const response = await apiClient.post('/api/students/signup', studentData);
       console.log('Signup successful:', response.data);
       setSnackbar({
         open: true,
@@ -121,7 +121,7 @@ const Signup = () => {
     setLoading(true);
     
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/clubs/signup`, clubData);
+       const response = await apiClient.post('/api/clubs/signup', clubData);
       console.log('Signup successful:', response.data);
       setSnackbar({
         open: true,

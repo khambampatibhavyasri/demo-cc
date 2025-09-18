@@ -12,8 +12,8 @@ import {
   IconButton
 } from "@mui/material";
 import { Edit, Save, Cancel } from "@mui/icons-material";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import apiClient from "../api/client";
+import { deepPurple } from "@mui/material/colors";
 import API_BASE_URL from '../config/api';
 import { deepPurple } from "@mui/material/colors";
 
@@ -41,7 +41,7 @@ const Profile = () => {
           throw new Error("No authentication token found");
         }
 
-        const response = await axios.get(`${API_BASE_URL}/api/students/profile`, {
+        const response = await apiClient.get("/api/students/profile", {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -72,8 +72,8 @@ const Profile = () => {
       setLoading(prev => ({ ...prev, save: true }));
       const token = localStorage.getItem("token");
       
-      const response = await axios.put(
-        `${API_BASE_URL}/api/students/profile`,
+      const response = await apiClient.put(
+        "/api/students/profile",
         profile,
         {
           headers: {

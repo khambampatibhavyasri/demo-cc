@@ -13,7 +13,7 @@ import {
   CircularProgress,
   Paper
 } from "@mui/material";
-import axios from "axios";
+import apiClient from "../../api/client";
 import { format } from "date-fns";
 import API_BASE_URL from '../../config/api';
 
@@ -32,7 +32,7 @@ const Purchased = () => {
           throw new Error("No authentication token found");
         }
 
-        const response = await axios.get(`${API_BASE_URL}/api/events/user/purchased-events`, {
+        const response = await apiClient.get("/api/events/user/purchased-events", {
           headers: {
             Authorization: `Bearer ${token}`
           }

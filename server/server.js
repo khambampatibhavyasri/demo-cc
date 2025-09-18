@@ -70,6 +70,10 @@ app.use('/api/events', (req, res, next) => {
   next();
 }, eventRoutes);
 
+app.get('/healthz', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // app.use('/api/admin/logs', adminLogRoutes);
 
 // Health check endpoint with enhanced logging

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../api/client';
 import { jwtDecode } from 'jwt-decode';
 import API_BASE_URL from '../config/api';
 import { 
@@ -61,7 +61,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     handleMenuClose();
     try {
-      await axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
+      await apiClient.post('/api/auth/logout', {}, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

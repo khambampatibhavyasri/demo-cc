@@ -18,7 +18,7 @@ import {
   DialogContent,
   DialogActions
 } from '@mui/material';
-import axios from 'axios';
+import apiClient from '../../api/client';
 import API_BASE_URL from '../../config/api';
 import { format } from 'date-fns';
 
@@ -42,8 +42,9 @@ const AllEventsPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/events/all`);
+        const response = await apiClient.get('/api/events/all');
         setEvents(response.data);
+        
         
         // Initialize purchase counts
         const counts = {};
@@ -89,8 +90,8 @@ const AllEventsPage = () => {
   const handlePurchaseConfirm = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `${API_BASE_URL}/api/events/${purchaseDialog.event._id}/purchase`,
+      const response = await apiClient.post(
+        `/api/events/${purchaseDialog.event._id}/purchase`,
         { quantity: purchaseDialog.quantity },
         {
           headers: { Authorization: `Bearer ${token}` }

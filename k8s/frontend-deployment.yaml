@@ -1,59 +1,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
-  namespace: campusconnect
+  name: campusconnect-frontend
   labels:
-    app: frontend
+    app: campusconnect-frontend
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: frontend
+      app: campusconnect-frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: campusconnect-frontend
     spec:
       containers:
-      - name: frontend
-        image: IMAGE_FRONTEND
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3000
-        env:
-        - name: REACT_APP_API_URL
-          valueFrom:
-            configMapKeyRef:
-              name: frontend-configmap
-              key: REACT_APP_API_URL
-        - name: REACT_APP_NODE_ENV
-          valueFrom:
-            configMapKeyRef:
-              name: frontend-configmap
-              key: REACT_APP_NODE_ENV
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          timeoutSeconds: 3
-      initContainers:
-      - name: wait-for-backend
-        image: busybox:1.35
-        command: ['sh', '-c', 'until nslookup backend-service; do echo waiting for backend; sleep 2; done;']
+        - name: frontend
+          image: registry.example.com/campusconnect-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi

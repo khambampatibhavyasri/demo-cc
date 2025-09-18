@@ -22,7 +22,7 @@ import {
   Snackbar,
   Alert
 } from "@mui/material";
-import axios from "axios";
+import apiClient from "../../api/client";
 import { format } from "date-fns";
 import API_BASE_URL from '../../config/api';
 
@@ -43,7 +43,7 @@ const AdminHome = () => {
       setError(null);
       const token = localStorage.getItem("token");
       
-      const response = await axios.get(`${API_BASE_URL}/api/events/admin/all`, {
+      const response = await apiClient.get(`/api/events/admin/all`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -81,8 +81,8 @@ const AdminHome = () => {
       setError(null);
       const token = localStorage.getItem("token");
       
-      await axios.put(
-        `${API_BASE_URL}/api/events/admin/${currentItem._id}`,
+      await apiClient.put(
+        `/api/events/admin/${currentItem._id}`,
         editForm,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -101,8 +101,8 @@ const AdminHome = () => {
       setError(null);
       const token = localStorage.getItem("token");
 
-      await axios.delete(
-        `${API_BASE_URL}/api/events/admin/${currentItem._id}`,
+      await apiClient.delete(
+        `/api/events/admin/${currentItem._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

@@ -1,14 +1,19 @@
-// API Configuration
-const getApiUrl = () => {
-  // Always use localhost:5000 for browser access in Docker
-  // The backend service is exposed on localhost:5000 from the host
-  return process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import axios from 'axios';
+
+const base = (process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:5000').replace(/\/$/, '');
+
+const apiClient = axios.create({
+  baseURL: base,
+});
+
+export const apiBaseUrl = base;
+
+export const resolveApiUrl = (path = '') => {
+  if (!path) {
+    return base;
+  }
+  const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${base}/${normalizedPath}`;
 };
 
-const API_BASE_URL = getApiUrl();
-
-console.log('[CONFIG] API Base URL:', API_BASE_URL);
-console.log('[CONFIG] Environment:', process.env.NODE_ENV);
-console.log('[CONFIG] Hostname:', window.location.hostname);
-
-export default API_BASE_URL;
+export default apiClient;

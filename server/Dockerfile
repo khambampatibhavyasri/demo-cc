@@ -1,17 +1,16 @@
-# Backend Dockerfile for Node.js Server
-FROM node:20-alpine
-
-# Set working directory
+# syntax=docker/dockerfile:1
+FROM node:18-alpine AS base
 WORKDIR /app
 
-# Install dumb-init for signal handling
-RUN apk add --no-cache dumb-init
-
-# Copy package files
-COPY package*.json ./
-
 # Install dependencies
-RUN npm ci --omit=dev && npm cache clean --force
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Bundle app
+COPY . .
+ENV NODE_ENV=production
+EXPOSE 5000
+CMD ["node", "server.js"]
 
 # Copy source code
 COPY . .

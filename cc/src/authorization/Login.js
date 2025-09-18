@@ -13,7 +13,7 @@ import {
   Alert
 } from '@mui/material';
 import { styled } from '@mui/system';
-import axios from 'axios';
+import apiClient from '../api/client';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import API_BASE_URL from '../config/api';
@@ -93,8 +93,8 @@ const Login = () => {
   
       console.log('Attempting login to:', endpoint, 'with:', loginData.email);
   
-      const response = await axios.post(
-        `${API_BASE_URL}${endpoint}`,
+       const response = await apiClient.post(
+        endpoint,
         loginData,
         {
           headers: {

@@ -14,7 +14,7 @@ import {
   CardActionArea,
   CircularProgress
 } from "@mui/material";
-import axios from "axios";
+import apiClient from "../../api/client";
 import API_BASE_URL from '../../config/api';
 
 const Clubs = () => {
@@ -28,7 +28,7 @@ const Clubs = () => {
     const fetchClubs = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(`${API_BASE_URL}/api/clubs/all`, {
+        const response = await apiClient.get("/api/clubs/all", {
           headers: {
             Authorization: `Bearer ${token}`
           }

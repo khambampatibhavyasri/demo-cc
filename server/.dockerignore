@@ -2,7 +2,7 @@ node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.git
+git
 .gitignore
 README.md
 .env
@@ -16,6 +16,8 @@ coverage
 .DS_Store
 .vscode
 .idea
-*.log
+.log
 Dockerfile
+.dockerignore
 docker-compose.yml
+.env

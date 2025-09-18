@@ -1,236 +1,147 @@
-# CampusConnect - 3-Tier Application
+# CampusConnect DevOps Pipeline
 
-A full-stack campus management system built with React, Node.js, and MongoDB Atlas.
+This repository now contains a full CI/CD implementation for the CampusConnect 3-tier application. Commits pushed to GitHub trigger automated Jenkins tests, container builds, and a Kubernetes deployment on your managed cluster of choice (Amazon EKS, Azure AKS, or Google GKE).
 
-## Architecture
+## Architecture Overview
 
-### 3-Tier Architecture
-- **Presentation Tier (Frontend)**: React.js application served by Nginx
-- **Application Tier (Backend)**: Node.js/Express.js API server
-- **Data Tier**: MongoDB Atlas (Cloud Database)
-
-## Technologies Used
-
-- **Frontend**: React.js, Material-UI, Nginx
-- **Backend**: Node.js, Express.js, JWT Authentication
-- **Database**: MongoDB Atlas (Cloud)
-- **Containerization**: Docker
-- **Orchestration**: Kubernetes
-- **Authentication**: JWT (JSON Web Tokens)
-
-## Prerequisites
-
-- Docker & Docker Compose
-- Kubernetes cluster (minikube, Docker Desktop, etc.)
-- kubectl CLI tool
-- Node.js (for local development)
-
-## Configuration
-
-### MongoDB Atlas Setup
-The application is configured to use MongoDB Atlas with the following connection string:
 ```
-mongodb+srv://druthi:druthi%402004@devops-cc.w5sl0nw.mongodb.net/campusconnect?retryWrites=true&w=majority&appName=devops-cc
+GitHub commit → Jenkins test pipeline → GitHub Actions build/deploy → Container Registry (ECR / Docker Hub / ACR / GCR) → Kubernetes cluster (EKS / AKS / GKE) → Load Balancer → Users
 ```
 
-### Port Configuration
-- **Frontend**: Port 3500 (Nginx)
-- **Backend**: Port 5000 (Node.js)
-- **Database**: MongoDB Atlas (Cloud)
+The stack is composed of:
 
-## Deployment
+- **Frontend:** React SPA served by an Nginx container (`cc/Dockerfile`).
+- **Backend:** Node.js/Express API (`server/Dockerfile`).
+- **Database:** MongoDB StatefulSet managed inside Kubernetes (`k8s/mongo-statefulset.yaml`).
 
-### Local Development
+## Repository Structure
 
-1. **Backend Development**:
+| Path | Description |
+|------|-------------|
+| `Jenkinsfile` | Jenkins declarative pipeline that installs dependencies and runs automated tests for the frontend and backend. |
+| `.github/workflows/cicd.yaml` | GitHub Actions workflow that orchestrates Jenkins, builds Docker images, pushes to your selected registry, and deploys to the chosen Kubernetes provider. |
+| `cc/` | React application with Docker build assets and an Axios client that respects `REACT_APP_API_BASE_URL`. |
+| `server/` | Express API server including a lightweight health endpoint for Kubernetes probes. |
+| `k8s/` | Kubernetes manifests and kustomization for namespace, MongoDB, backend, and frontend services. |
+
+## Local Development
+
+1. Install dependencies:
    ```bash
-   cd server
-   npm install
-   npm run dev
+   npm --prefix server install
+   npm --prefix cc install
    ```
+2. Provide a local MongoDB instance (e.g., Docker `mongo` container).
+3. Run the API: `npm --prefix server start` (requires `MONGO_URI` environment variable).
+4. Run the frontend: `npm --prefix cc start` and visit `http://localhost:3000`.
 
-2. **Frontend Development**:
-   ```bash
-   cd cc
-   npm install
-   npm start
-   ```
+Set `REACT_APP_API_BASE_URL` when building or running the frontend to point at the backend origin (defaults to `http://localhost:5000`).
 
-3. **Test APIs**:
-   ```bash
-   cd server
-   npm run test-apis
-   ```
+## Containerization
 
-### Docker Deployment
+- **Backend Image:** `server/Dockerfile` installs production dependencies and exposes port 5000. A `/healthz` endpoint was added to support Kubernetes probes.
+- **Frontend Image:** `cc/Dockerfile` produces an optimized React build and serves it via Nginx (`cc/nginx/default.conf`). `REACT_APP_API_BASE_URL` is injected at build time.
+- `.dockerignore` files ensure transient artifacts are excluded from Docker contexts.
 
-1. **Build Images**:
-   ```bash
-   # Backend
-   cd server
-   docker build -t campusconnect-backend:latest .
-
-   # Frontend
-   cd ../cc
-   docker build -t campusconnect-frontend:latest .
-   ```
-
-2. **Run with Docker Compose** (if available):
-   ```bash
-   docker-compose up -d
-   ```
-
-### Kubernetes Deployment
-
-1. **Deploy using the automated script**:
-   ```bash
-   chmod +x deploy-k8s.sh
-   ./deploy-k8s.sh
-   ```
-
-2. **Manual Deployment**:
-   ```bash
-   # Create namespace
-   kubectl apply -f k8s/namespace.yaml
-
-   # Deploy secrets and configmaps
-   kubectl apply -f k8s/backend-secret.yaml
-   kubectl apply -f k8s/backend-configmap.yaml
-   kubectl apply -f k8s/frontend-configmap.yaml
-
-   # Deploy backend
-   kubectl apply -f k8s/backend-deployment.yaml
-   kubectl apply -f k8s/backend-service.yaml
-
-   # Deploy frontend
-   kubectl apply -f k8s/frontend-deployment.yaml
-   kubectl apply -f k8s/frontend-service.yaml
-
-   # Apply network policies
-   kubectl apply -f k8s/network-policy.yaml
-   ```
-
-3. **Access the Application**:
-   ```bash
-   # Port forwarding
-   kubectl port-forward service/frontend-service 3500:3500 -n campusconnect
-   kubectl port-forward service/backend-service 5000:5000 -n campusconnect
-   ```
-
-## API Endpoints
-
-### Student Endpoints
-- `POST /api/students/signup` - Student registration
-- `POST /api/students/login` - Student login
-- `GET /api/students/profile` - Get student profile
-- `PUT /api/students/profile` - Update student profile
-
-### Club Endpoints
-- `GET /api/clubs` - Get all clubs
-- `POST /api/clubs` - Create new club
-- `GET /api/clubs/:id` - Get club details
-
-### Admin Endpoints
-- `POST /api/admin/login` - Admin login
-- `GET /api/admin/dashboard` - Admin dashboard
-
-### Event Endpoints
-- `GET /api/events` - Get all events
-- `POST /api/events` - Create new event
-
-## Environment Variables
-
-### Backend (.env)
-```
-NODE_ENV=production
-PORT=5000
-MONGODB_URI=mongodb+srv://druthi:druthi%402004@devops-cc.w5sl0nw.mongodb.net/campusconnect?retryWrites=true&w=majority&appName=devops-cc
-JWT_SECRET=your-secret-key
-```
-
-### Frontend (.env)
-```
-REACT_APP_API_URL=http://localhost:5000
-REACT_APP_NODE_ENV=production
-```
-
-## Monitoring & Logging
-
-### Check Logs
+### Manual Build Examples
 ```bash
-# Backend logs
-kubectl logs -l app=backend -n campusconnect -f
+# Backend
+docker build -t campusconnect-backend ./server
 
-# Frontend logs
-kubectl logs -l app=frontend -n campusconnect -f
+# Frontend (override API URL)
+docker build -t campusconnect-frontend \ 
+  --build-arg REACT_APP_API_BASE_URL="https://api.example.com" ./cc
 ```
 
-### Health Checks
+## Jenkins Continuous Testing
+
+The `Jenkinsfile` defines a Docker-based pipeline that:
+1. Checks out the repository.
+2. Installs Node.js dependencies for both services via `npm ci`.
+3. Runs backend syntax tests (`npm --prefix server test`).
+4. Runs the React test suite in CI mode (`npm --prefix cc test -- --watchAll=false`).
+
+Configure a Jenkins pipeline job that points at this repository and uses the provided Jenkinsfile. Expose Jenkins API credentials and an optional job token for GitHub Actions (see below). The Jenkins agent uses the `node:18-bullseye` Docker image, so no global Node installation is required on the host.
+
+## GitHub Actions CI/CD
+
+Workflow file: `.github/workflows/cicd.yaml`
+
+1. **Jenkins Gate:** The `jenkins-tests` job triggers the Jenkins pipeline via REST API and waits until it succeeds.
+2. **Image Build & Push:** After Jenkins success, Docker Buildx builds the frontend and backend images, tagging them with the commit SHA and `latest`, then pushes to the registry identified by `REGISTRY_PROVIDER`.
+3. **Deployment:** The workflow authenticates to the Kubernetes provider specified by `K8S_PROVIDER`, applies the manifests under `k8s/`, and performs rolling updates by setting the new image tags.
+
+The image build/publish and deployment jobs execute only for direct `push` events. Pull requests still run the Jenkins gate but skip publishing artifacts or mutating the cluster.
+
+### Provider and secret configuration
+
+Set the following GitHub secrets so the workflow knows which registry and Kubernetes cluster to target.
+
+#### Common values
+
+| Secret | Purpose |
+|--------|---------|
+| `REGISTRY_PROVIDER` | Choose the container registry (`ecr`, `dockerhub`, `acr`, or `gcr`). Defaults to `ecr` when unset. |
+| `K8S_PROVIDER` | Choose the Kubernetes provider (`eks`, `aks`, or `gke`). Defaults to `eks` when unset. |
+| `BACKEND_IMAGE_NAME`, `FRONTEND_IMAGE_NAME` | Repository names used when tagging the backend and frontend images (for example `campusconnect-backend`). |
+| `CONTAINER_REGISTRY` | Base registry hostname/namespace (e.g., `docker.io/example`, `myregistry.azurecr.io`). Required for Docker Hub, ACR, and GCR, optional for ECR where it falls back to the login output. |
+| `REACT_APP_API_BASE_URL` | Base URL for the backend API baked into the frontend build. |
+| `K8S_MONGO_URI` | MongoDB connection string published into the cluster secret (`mongo-credentials`). Example: `mongodb://mongo:27017/campusconnect`. |
+
+#### Jenkins API access
+
+- `JENKINS_URL`
+- `JENKINS_USER`
+- `JENKINS_API_TOKEN`
+- `JENKINS_JOB_URL`
+- `JENKINS_BUILD_TOKEN` (optional if the job requires one)
+
+The workflow gracefully handles Jenkins instances without the crumb issuer plugin.
+
+#### Registry-specific credentials
+
+- **Amazon ECR (`REGISTRY_PROVIDER=ecr`):** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` (shared with EKS). Optionally override the registry host with `CONTAINER_REGISTRY`.
+- **Docker Hub (`REGISTRY_PROVIDER=dockerhub`):** `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, and `CONTAINER_REGISTRY` set to `docker.io/<username>`.
+- **Azure Container Registry (`REGISTRY_PROVIDER=acr`):** `AZURE_ACR_LOGIN_SERVER`, `AZURE_ACR_USERNAME`, `AZURE_ACR_PASSWORD`, plus `CONTAINER_REGISTRY` (typically the same as the login server).
+- **Google Artifact/Container Registry (`REGISTRY_PROVIDER=gcr`):** `GCP_SERVICE_ACCOUNT_KEY` (JSON), `GCP_PROJECT_ID`, `GCP_REGISTRY_HOST`, and `CONTAINER_REGISTRY` (for example `us-central1-docker.pkg.dev/<project>/<repository>`).
+
+#### Kubernetes provider credentials
+
+- **Amazon EKS (`K8S_PROVIDER=eks`):** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, and `EKS_CLUSTER_NAME`.
+- **Azure AKS (`K8S_PROVIDER=aks`):** `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP`, and `AZURE_AKS_CLUSTER`.
+- **Google GKE (`K8S_PROVIDER=gke`):** `GCP_SERVICE_ACCOUNT_KEY`, `GCP_PROJECT_ID`, `GKE_CLUSTER_NAME`, and `GKE_LOCATION`.
+
+The workflow requires `jq` (preinstalled on `ubuntu-latest`) to parse Jenkins API responses.
+
+## Kubernetes Deployment
+
+The `k8s/` directory contains manifests managed by kustomize:
+
+- `namespace.yaml` provisions the `campusconnect` namespace.
+- `mongo-statefulset.yaml` provisions MongoDB with persistent storage and readiness probes.
+- `backend-deployment.yaml` and `backend-service.yaml` deploy the API with `/healthz` probes and a ClusterIP service. The deployment expects a secret named `mongo-credentials` containing a `mongo-uri` key.
+- `frontend-deployment.yaml` and `frontend-service.yaml` deploy the React app behind a `LoadBalancer` service.
+
+Update the placeholder container images in the deployment manifests or rely on the GitHub Actions workflow, which overrides them with freshly built tags each run.
+
+Apply the stack manually with:
 ```bash
-# Backend health
-curl http://localhost:5000/health
-
-# Frontend health
-curl http://localhost:3500/health
+kubectl apply -k k8s
 ```
 
-## Security Features
+Before deploying, create the database secret once (the GitHub Actions workflow does this automatically when `K8S_MONGO_URI` is set):
 
-- JWT-based authentication
-- Password hashing with bcrypt
-- CORS configuration
-- Security headers in Nginx
-- Non-root user in Docker containers
-- Kubernetes network policies
-
-## Database Schema
-
-### Student Schema
-```javascript
-{
-  name: String (required),
-  email: String (required, unique),
-  course: String (required),
-  password: String (required, hashed)
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Database Connection Issues**:
-   - Verify MongoDB Atlas connection string
-   - Check network connectivity
-   - Ensure IP whitelist includes your deployment environment
-
-2. **Port Conflicts**:
-   - Frontend: Port 3500
-   - Backend: Port 5000
-   - Ensure these ports are available
-
-3. **Kubernetes Issues**:
-   - Check pod status: `kubectl get pods -n campusconnect`
-   - Check service status: `kubectl get services -n campusconnect`
-   - Check logs: `kubectl logs <pod-name> -n campusconnect`
-
-### Cleanup
 ```bash
-# Delete entire deployment
-kubectl delete namespace campusconnect
-
-# Remove Docker images
-docker rmi campusconnect-backend:latest campusconnect-frontend:latest
+kubectl -n campusconnect create secret generic mongo-credentials \
+  --from-literal=mongo-uri="mongodb://mongo:27017/campusconnect"
 ```
 
-## Contributing
+## End-to-End Flow
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+1. **Developer pushes code to GitHub.**
+2. **Jenkins** runs automated tests using the repo's Jenkinsfile.
+3. **GitHub Actions** builds Docker images on success and pushes them to the configured container registry.
+4. **GitHub Actions** deploys the updated manifests to the selected Kubernetes cluster (EKS, AKS, or GKE).
+5. The **LoadBalancer service** exposes the React frontend publicly; the frontend communicates with the backend service inside the cluster, which in turn connects to MongoDB.
 
-## License
-
-This project is licensed under the ISC License.
+This setup delivers a reproducible, automated pipeline from commit to production for the CampusConnect application.

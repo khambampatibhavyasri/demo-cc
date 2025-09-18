@@ -11,7 +11,7 @@ import {
   IconButton
 } from "@mui/material";
 import { Edit, Save, Cancel } from "@mui/icons-material";
-import axios from "axios";
+import apiClient from "../api/client";
 import { jwtDecode } from "jwt-decode";
 import API_BASE_URL from '../config/api';
 import { deepPurple } from "@mui/material/colors";
@@ -43,7 +43,7 @@ const ClubProfile = () => {
           throw new Error("Access denied. Club authorization required");
         }
 
-        const response = await axios.get(`${API_BASE_URL}/api/clubs/profile`, {
+         const response = await apiClient.get("/api/clubs/profile", {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -74,8 +74,8 @@ const ClubProfile = () => {
       setLoading(prev => ({ ...prev, save: true }));
       const token = localStorage.getItem("token");
       
-      const response = await axios.put(
-        `${API_BASE_URL}/api/clubs/profile`,
+      const response = await apiClient.put(
+        "/api/clubs/profile",
         profile,
         {
           headers: {
