@@ -13,9 +13,8 @@ RUN npm install
 # Copy backend source
 COPY server/ ./
 
-# Create a simple static frontend directory with a placeholder
-RUN mkdir -p public
-COPY cc/public/index.html public/ 2>/dev/null || echo '<!DOCTYPE html><html><head><title>CampusConnect</title></head><body><h1>CampusConnect App</h1><p>Backend is running!</p></body></html>' > public/index.html
+# Copy the simple HTML file for frontend
+COPY public/index.html ./public/
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \

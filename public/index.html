@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 CampusConnect</h1>
+        <p class="status">✅ Application is running successfully!</p>
+        <p>Backend API is ready and serving requests.</p>
+        <p>Frontend will be integrated in future deployments.</p>
+
+        <h3>Available Endpoints:</h3>
+        <ul>
+            <li><a href="/health">/health</a> - Health check</li>
+            <li><a href="/healthz">/healthz</a> - Simple health status</li>
+            <li>/api/students - Student API</li>
+            <li>/api/clubs - Club API</li>
+            <li>/api/admin - Admin API</li>
+            <li>/api/events - Events API</li>
+        </ul>
+    </div>
+</body>
+</html>
